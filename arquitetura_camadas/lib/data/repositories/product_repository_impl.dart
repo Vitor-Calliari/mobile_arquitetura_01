@@ -3,8 +3,6 @@ import '../../domain/repositories/product_repository.dart';
 import '../datasources/product_local_datasource.dart';
 import '../datasources/product_remote_datasource.dart';
 
-/// Decide de onde os dados vêm: API remota (preferencial) ou cache local
-/// (fallback quando a API não está disponível).
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
   final ProductLocalDataSource localDataSource;
@@ -18,15 +16,10 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<List<Product>> getProducts() async {
     try {
       final products = await remoteDataSource.getProducts();
-      // Atualiza o cache sempre que a API responde com sucesso
       await localDataSource.saveProducts(products);
       return products;
     } catch (_) {
-      // API falhou — tenta usar o cache local como fallback
-      if (localDataSource.hasCache) {
-        return localDataSource.getCachedProducts();
-      }
-      // Sem cache disponível, propaga o erro original
+      if (localDataSource.hasCache) return localDataSource.getCachedProducts();
       rethrow;
     }
   }
@@ -34,5 +27,25 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<List<Product>> getCachedProducts() {
     return localDataSource.getCachedProducts();
+  }
+
+  @override
+  Future<Product> addProduct(Product product) async {
+    final created = await remoteDataSource.addProduct(product);
+    await localDataSource.addProductToCache(created);
+    return created;
+  }
+
+  @override
+  Future<Product> updateProduct(Product product) async {
+    final updated = await remoteDataSource.updateProduct(product);
+    await localDataSource.updateProductInCache(updated);
+    return updated;
+  }
+
+  @override
+  Future<void> deleteProduct(int id) async {
+    await remoteDataSource.deleteProduct(id);
+    await localDataSource.deleteProductFromCache(id);
   }
 }

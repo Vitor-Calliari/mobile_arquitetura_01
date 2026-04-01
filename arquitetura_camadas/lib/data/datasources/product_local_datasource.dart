@@ -1,12 +1,11 @@
+import '../../domain/entities/product.dart';
 import '../models/product_model.dart';
 
-/// DataSource responsável apenas por operações de IO de cache local.
-/// Por ora, o cache é mantido em memória durante a sessão.
-/// Pode ser substituído por SharedPreferences ou SQLite sem afetar outras camadas.
 class ProductLocalDataSource {
   List<ProductModel>? _cachedProducts;
 
-  /// Retorna os produtos em cache, ou lança exceção se não houver cache.
+  bool get hasCache => _cachedProducts != null && _cachedProducts!.isNotEmpty;
+
   Future<List<ProductModel>> getCachedProducts() async {
     final cache = _cachedProducts;
     if (cache == null || cache.isEmpty) {
@@ -15,11 +14,24 @@ class ProductLocalDataSource {
     return cache;
   }
 
-  /// Persiste a lista de produtos no cache local.
   Future<void> saveProducts(List<ProductModel> products) async {
-    _cachedProducts = List.unmodifiable(products);
+    _cachedProducts = List.of(products);
   }
 
-  /// Indica se existe algum dado em cache.
-  bool get hasCache => _cachedProducts != null && _cachedProducts!.isNotEmpty;
+  Future<void> addProductToCache(Product product) async {
+    _cachedProducts ??= [];
+    _cachedProducts!.add(ProductModel.fromProduct(product));
+  }
+
+  Future<void> updateProductInCache(Product product) async {
+    if (_cachedProducts == null) return;
+    final index = _cachedProducts!.indexWhere((p) => p.id == product.id);
+    if (index != -1) {
+      _cachedProducts![index] = ProductModel.fromProduct(product);
+    }
+  }
+
+  Future<void> deleteProductFromCache(int id) async {
+    _cachedProducts?.removeWhere((p) => p.id == id);
+  }
 }
