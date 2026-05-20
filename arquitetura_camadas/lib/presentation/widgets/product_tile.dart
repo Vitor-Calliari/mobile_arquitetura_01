@@ -24,11 +24,12 @@ class ProductTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       leading: Image.network(
-        product.image,
+        product.thumbnail,
         width: 50,
         height: 50,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 50),
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.broken_image, size: 50),
       ),
       title: Text(
         product.title,
@@ -50,7 +51,7 @@ class ProductTile extends StatelessWidget {
               isFavorite ? Icons.favorite : Icons.favorite_border,
               color: isFavorite ? Colors.red : Colors.grey,
             ),
-            tooltip: isFavorite ? 'Remover dos favoritos' : 'Favoritar',
+            tooltip: isFavorite ? 'Remover favorito' : 'Favoritar',
             onPressed: onToggleFavorite,
           ),
           IconButton(

@@ -5,7 +5,7 @@ class ProductModel extends Product {
     required super.id,
     required super.title,
     required super.price,
-    required super.image,
+    required super.thumbnail,
     required super.description,
     required super.category,
   });
@@ -15,7 +15,7 @@ class ProductModel extends Product {
       id: json['id'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      image: json['image'] as String? ?? '',
+      thumbnail: json['thumbnail'] as String? ?? '',
       description: json['description'] as String? ?? '',
       category: json['category'] as String? ?? '',
     );
@@ -26,7 +26,7 @@ class ProductModel extends Product {
       id: product.id,
       title: product.title,
       price: product.price,
-      image: product.image,
+      thumbnail: product.thumbnail,
       description: product.description,
       category: product.category,
     );
@@ -36,7 +36,7 @@ class ProductModel extends Product {
   Map<String, dynamic> toJson() => {
         'title': title,
         'price': price,
-        'image': image,
+        'thumbnail': thumbnail,
         'description': description,
         'category': category,
       };

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'presentation/pages/product_list_page.dart';
+import 'presentation/pages/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,9 +11,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fake Store',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const ProductListPage(),
+      title: 'Produtos',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.indigo,
+        useMaterial3: true,
+      ),
+      home: const LoginPage(),
     );
   }
 }

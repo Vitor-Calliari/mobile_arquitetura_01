@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/sessions/session_manager.dart';
 import '../../data/datasources/product_local_datasource.dart';
 import '../../data/datasources/product_remote_datasource.dart';
 import '../../data/repositories/product_repository_impl.dart';
@@ -8,6 +9,7 @@ import '../viewmodels/favorites_viewmodel.dart';
 import '../viewmodels/product_state.dart';
 import '../viewmodels/product_viewmodel.dart';
 import '../widgets/product_tile.dart';
+import 'login_page.dart';
 import 'product_detail_page.dart';
 import 'product_form_page.dart';
 
@@ -53,11 +55,39 @@ class _ProductListPageState extends State<ProductListPage> {
     if (mounted) setState(() {});
   }
 
+  void _logout() {
+    SessionManager.instance.clear();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (_) => false, // limpa toda a pilha de navegação
+    );
+  }
+
+  Future<void> _confirmLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Deseja encerrar a sessão?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) _logout();
+  }
+
   void _openDetail(Product product) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ProductDetailPage(product: product),
-      ),
+          builder: (_) => ProductDetailPage(product: product)),
     );
   }
 
@@ -70,10 +100,7 @@ class _ProductListPageState extends State<ProductListPage> {
         ),
       ),
     );
-
-    if (saved != null) {
-      _viewModel.upsertProduct(saved);
-    }
+    if (saved != null) _viewModel.upsertProduct(saved);
   }
 
   Future<void> _confirmDelete(Product product) async {
@@ -88,7 +115,8 @@ class _ProductListPageState extends State<ProductListPage> {
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style:
+                FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Excluir'),
           ),
@@ -115,15 +143,58 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = SessionManager.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Produtos'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Produtos'),
+            if (user != null)
+              Text(
+                'Olá, ${user.fullName}',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Colors.white70),
+              ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Recarregar',
             onPressed: _viewModel.loadProducts,
           ),
+          if (user != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: _confirmLogout,
+                child: Tooltip(
+                  message: 'Sair (${user.username})',
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white24,
+                    foregroundImage: NetworkImage(user.image),
+                    child: Text(
+                      user.firstName[0].toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Sair',
+              onPressed: _confirmLogout,
+            ),
         ],
       ),
       body: _buildBody(_viewModel.state),
@@ -137,13 +208,20 @@ class _ProductListPageState extends State<ProductListPage> {
 
   Widget _buildBody(ProductState state) {
     return switch (state) {
-      ProductLoading() => const Center(child: CircularProgressIndicator()),
-      ProductSuccess(products: final products, fromCache: final fromCache) =>
+      ProductLoading() =>
+        const Center(child: CircularProgressIndicator()),
+      ProductSuccess(
+        products: final products,
+        fromCache: final fromCache
+      ) =>
         _buildProductList(
           products,
           banner: fromCache ? _cacheBanner() : null,
         ),
-      ProductError(message: final message, cachedProducts: final cached) =>
+      ProductError(
+        message: final message,
+        cachedProducts: final cached
+      ) =>
         cached != null && cached.isNotEmpty
             ? _buildProductList(cached, banner: _errorBanner(message))
             : _buildFullError(message),
@@ -161,7 +239,8 @@ class _ProductListPageState extends State<ProductListPage> {
               final product = products[index];
               return ProductTile(
                 product: product,
-                isFavorite: _favoritesViewModel.isFavorite(product.id),
+                isFavorite:
+                    _favoritesViewModel.isFavorite(product.id),
                 onToggleFavorite: () =>
                     _favoritesViewModel.toggleFavorite(product.id),
                 onTap: () => _openDetail(product),
@@ -184,11 +263,9 @@ class _ProductListPageState extends State<ProductListPage> {
           children: [
             const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _viewModel.loadProducts,
@@ -205,10 +282,8 @@ class _ProductListPageState extends State<ProductListPage> {
     return MaterialBanner(
       backgroundColor: Colors.red.shade50,
       leading: const Icon(Icons.warning_amber, color: Colors.red),
-      content: Text(
-        '$message Exibindo dados anteriores.',
-        style: const TextStyle(color: Colors.red),
-      ),
+      content: Text('$message Exibindo dados anteriores.',
+          style: const TextStyle(color: Colors.red)),
       actions: [
         TextButton(
           onPressed: _viewModel.loadProducts,
@@ -222,10 +297,8 @@ class _ProductListPageState extends State<ProductListPage> {
     return MaterialBanner(
       backgroundColor: Colors.amber.shade50,
       leading: const Icon(Icons.cached, color: Colors.orange),
-      content: const Text(
-        'Exibindo dados do cache local.',
-        style: TextStyle(color: Colors.orange),
-      ),
+      content: const Text('Exibindo dados do cache local.',
+          style: TextStyle(color: Colors.orange)),
       actions: [
         TextButton(
           onPressed: _viewModel.loadProducts,

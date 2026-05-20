@@ -34,8 +34,7 @@ class ProductViewModel extends ChangeNotifier {
 
     if (_state case ProductSuccess(products: final list)) {
       _state = ProductSuccess(
-        products: list.where((p) => p.id != id).toList(),
-      );
+          products: list.where((p) => p.id != id).toList());
       notifyListeners();
     }
 
@@ -54,7 +53,6 @@ class ProductViewModel extends ChangeNotifier {
       final updated = exists
           ? list.map((p) => p.id == product.id ? product : p).toList()
           : [...list, product];
-
       _state = ProductSuccess(products: updated);
       notifyListeners();
     }
@@ -70,9 +68,7 @@ class ProductViewModel extends ChangeNotifier {
 
   String _humanReadableError(Object e) {
     final msg = e.toString();
-    if (msg.contains('SocketException') ||
-        msg.contains('Connection refused') ||
-        msg.contains('Failed host lookup')) {
+    if (msg.contains('SocketException') || msg.contains('Failed host lookup')) {
       return 'Sem conexão com a internet.';
     }
     if (msg.contains('TimeoutException')) {

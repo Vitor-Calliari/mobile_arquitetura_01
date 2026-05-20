@@ -19,31 +19,29 @@ class ProductFormPage extends StatefulWidget {
 
 class _ProductFormPageState extends State<ProductFormPage> {
   final _formKey = GlobalKey<FormState>();
-
   late final ProductFormViewModel _viewModel;
 
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _priceController;
   late final TextEditingController _categoryController;
-  late final TextEditingController _imageController;
+  late final TextEditingController _thumbnailController;
 
   @override
   void initState() {
     super.initState();
-
     _viewModel = ProductFormViewModel(
       repository: widget.repository,
       editingProduct: widget.editingProduct,
     );
-
     final p = widget.editingProduct;
     _titleController = TextEditingController(text: p?.title ?? '');
-    _descriptionController = TextEditingController(text: p?.description ?? '');
+    _descriptionController =
+        TextEditingController(text: p?.description ?? '');
     _priceController =
         TextEditingController(text: p != null ? p.price.toString() : '');
     _categoryController = TextEditingController(text: p?.category ?? '');
-    _imageController = TextEditingController(text: p?.image ?? '');
+    _thumbnailController = TextEditingController(text: p?.thumbnail ?? '');
 
     _viewModel.addListener(_onStateChange);
   }
@@ -56,7 +54,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _descriptionController.dispose();
     _priceController.dispose();
     _categoryController.dispose();
-    _imageController.dispose();
+    _thumbnailController.dispose();
     super.dispose();
   }
 
@@ -69,24 +67,20 @@ class _ProductFormPageState extends State<ProductFormPage> {
     } else if (state is ProductFormError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(state.message),
-          backgroundColor: Colors.red,
-        ),
+            content: Text(state.message), backgroundColor: Colors.red),
       );
     }
-
     setState(() {});
   }
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-
     _viewModel.save(
       title: _titleController.text,
       description: _descriptionController.text,
       price: double.parse(_priceController.text.replaceAll(',', '.')),
       category: _categoryController.text,
-      image: _imageController.text,
+      thumbnail: _thumbnailController.text,
     );
   }
 
@@ -96,7 +90,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_viewModel.isEditing ? 'Editar Produto' : 'Novo Produto'),
+        title: Text(
+            _viewModel.isEditing ? 'Editar Produto' : 'Novo Produto'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -107,8 +102,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
               _field(
                 controller: _titleController,
                 label: 'Nome',
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Informe o nome' : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'Informe o nome'
+                    : null,
               ),
               const SizedBox(height: 12),
               _field(
@@ -123,11 +119,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
               _field(
                 controller: _priceController,
                 label: 'Preço',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe o preço';
-                  final parsed = double.tryParse(v.replaceAll(',', '.'));
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Informe o preço';
+                  }
+                  final parsed =
+                      double.tryParse(v.replaceAll(',', '.'));
                   if (parsed == null || parsed <= 0) {
                     return 'Preço inválido';
                   }
@@ -144,7 +143,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               ),
               const SizedBox(height: 12),
               _field(
-                controller: _imageController,
+                controller: _thumbnailController,
                 label: 'URL da imagem (opcional)',
               ),
               const SizedBox(height: 24),
@@ -157,11 +156,12 @@ class _ProductFormPageState extends State<ProductFormPage> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                              strokeWidth: 2,
+                              color: Colors.white),
                         )
-                      : Text(_viewModel.isEditing ? 'Salvar' : 'Cadastrar'),
+                      : Text(_viewModel.isEditing
+                          ? 'Salvar'
+                          : 'Cadastrar'),
                 ),
               ),
             ],

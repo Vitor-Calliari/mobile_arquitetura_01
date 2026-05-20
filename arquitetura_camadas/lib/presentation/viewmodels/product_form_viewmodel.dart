@@ -37,7 +37,7 @@ class ProductFormViewModel extends ChangeNotifier {
     required String description,
     required double price,
     required String category,
-    required String image,
+    required String thumbnail,
   }) async {
     _state = ProductFormLoading();
     notifyListeners();
@@ -49,9 +49,9 @@ class ProductFormViewModel extends ChangeNotifier {
         description: description.trim(),
         price: price,
         category: category.trim(),
-        image: image.trim().isEmpty
-            ? 'https://fakestoreapi.com/img/placeholder.png'
-            : image.trim(),
+        thumbnail: thumbnail.trim().isEmpty
+            ? 'https://dummyjson.com/icon/placeholder/128'
+            : thumbnail.trim(),
       );
 
       final result = isEditing

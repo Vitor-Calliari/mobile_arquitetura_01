@@ -17,7 +17,7 @@ class ProductDetailPage extends StatelessWidget {
           children: [
             Center(
               child: Image.network(
-                product.image,
+                product.thumbnail,
                 height: 220,
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) =>

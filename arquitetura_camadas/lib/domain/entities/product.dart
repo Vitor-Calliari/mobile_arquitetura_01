@@ -2,7 +2,7 @@ class Product {
   final int id;
   final String title;
   final double price;
-  final String image;
+  final String thumbnail;
   final String description;
   final String category;
 
@@ -10,7 +10,7 @@ class Product {
     required this.id,
     required this.title,
     required this.price,
-    required this.image,
+    required this.thumbnail,
     required this.description,
     required this.category,
   });
@@ -19,7 +19,7 @@ class Product {
     int? id,
     String? title,
     double? price,
-    String? image,
+    String? thumbnail,
     String? description,
     String? category,
   }) {
@@ -27,7 +27,7 @@ class Product {
       id: id ?? this.id,
       title: title ?? this.title,
       price: price ?? this.price,
-      image: image ?? this.image,
+      thumbnail: thumbnail ?? this.thumbnail,
       description: description ?? this.description,
       category: category ?? this.category,
     );
@@ -37,7 +37,7 @@ class Product {
         'id': id,
         'title': title,
         'price': price,
-        'image': image,
+        'thumbnail': thumbnail,
         'description': description,
         'category': category,
       };
